@@ -1,7 +1,7 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from dotenv import load_dotenv
-from models import db
+from models import db, User
 
 
 def create_app():
@@ -17,6 +17,29 @@ def create_app():
     @app.route('/api/ping')
     def ping():
         return jsonify({'message': 'API operativa'})
+
+    @app.route('/api/register', methods=['POST'])
+    def register():
+        data = request.get_json() or {}
+        if not data.get('username') or not data.get('password'):
+            return jsonify({'error': 'username and password required'}), 400
+        if User.query.filter_by(username=data['username']).first():
+            return jsonify({'error': 'username already exists'}), 400
+        user = User(username=data['username'])
+        user.set_password(data['password'])
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({'message': 'user created'})
+
+    @app.route('/api/login', methods=['POST'])
+    def login():
+        data = request.get_json() or {}
+        if not data.get('username') or not data.get('password'):
+            return jsonify({'error': 'username and password required'}), 400
+        user = User.query.filter_by(username=data['username']).first()
+        if user and user.check_password(data['password']):
+            return jsonify({'message': 'login successful'})
+        return jsonify({'error': 'invalid credentials'}), 401
 
     return app
 
