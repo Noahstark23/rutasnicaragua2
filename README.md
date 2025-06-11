@@ -1,2 +1,17 @@
 # rutasnicaragua2
-todas las rutas y viejas de nicaragua en una sola pagina 
+
+Backend en Flask para administrar rutas de transporte de Nicaragua.
+
+## Uso
+
+1. Copia `.env.example` a `.env` y completa tus datos de base de datos PostgreSQL.
+2. Instala dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Ejecuta la aplicación:
+   ```bash
+   python app.py
+   ```
+
+El endpoint de prueba `/api/ping` responderá con `{"message": "API operativa"}`.
