@@ -14,4 +14,9 @@ Backend en Flask para administrar rutas de transporte de Nicaragua.
    python app.py
    ```
 
+Para cargar datos GTFS de la carpeta `data/gtfs` a la base de datos ejecuta:
+```bash
+./load_gtfs.sh
+```
+
 El endpoint de prueba `/api/ping` responderá con `{"message": "API operativa"}`.
