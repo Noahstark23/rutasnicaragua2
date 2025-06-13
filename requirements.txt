@@ -3,3 +3,7 @@ sqlalchemy
 psycopg2-binary
 pandas
 python-dotenv
+
+requests
+beautifulsoup4
+PyJWT

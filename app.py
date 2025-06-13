@@ -1,5 +1,7 @@
 import os
 from flask import Flask, jsonify, request
+import datetime
+import jwt
 from dotenv import load_dotenv
 from models import db, User
 
@@ -7,6 +9,7 @@ from models import db, User
 def create_app():
     load_dotenv()
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'changeme')
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@"
         f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
@@ -38,7 +41,12 @@ def create_app():
             return jsonify({'error': 'username and password required'}), 400
         user = User.query.filter_by(username=data['username']).first()
         if user and user.check_password(data['password']):
-            return jsonify({'message': 'login successful'})
+            payload = {
+                'user_id': user.id,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=12)
+            }
+            token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+            return jsonify({'token': token})
         return jsonify({'error': 'invalid credentials'}), 401
 
     return app
