@@ -39,14 +39,25 @@ def create_app():
         data = request.get_json() or {}
         if not data.get('username') or not data.get('password'):
             return jsonify({'error': 'username and password required'}), 400
+
         user = User.query.filter_by(username=data['username']).first()
         if user and user.check_password(data['password']):
+            expiration_hours = int(os.getenv('TOKEN_EXPIRATION_HOURS', '12'))
             payload = {
                 'user_id': user.id,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=12)
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=expiration_hours)
             }
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-            return jsonify({'token': token})
+            response = jsonify({'token': token, 'username': user.username})
+            response.set_cookie(
+                'auth_token',
+                token,
+                httponly=True,
+                max_age=expiration_hours * 3600,
+                samesite='Lax',
+            )
+            return response
+
         return jsonify({'error': 'invalid credentials'}), 401
 
     return app
