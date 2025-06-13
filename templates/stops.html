@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Paradas</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <h1>Paradas de {{ route.long_name }}</h1>
+    <ul>
+      {% for s in stops %}
+      <li>{{ s.name }} - <a href="{{ url_for('edit_stop', stop_id=s.id) }}?route_id={{ route.id }}">Editar</a></li>
+      {% endfor %}
+    </ul>
+    <a href="{{ url_for('list_routes') }}">Volver</a>
+  </body>
+</html>

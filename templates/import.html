@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Importar JSON</title>
+  </head>
+  <body>
+    <h1>Importar desde JSON</h1>
+    <form method="post" enctype="multipart/form-data">
+      <input type="file" name="file" />
+      <button type="submit">Subir</button>
+    </form>
+    {% if preview %}
+    <pre>{{ preview|tojson(indent=2) }}</pre>
+    {% endif %}
+    <a href="{{ url_for('list_routes') }}">Volver</a>
+  </body>
+</html>
