@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ruta</title>
+  </head>
+  <body>
+    <h1>{{ 'Editar' if route else 'Nueva' }} Ruta</h1>
+    <form method="post">
+      <label>Región
+        <select name="region_id">
+          {% for reg in regions %}
+          <option value="{{ reg.id }}" {% if route and route.region_id == reg.id %}selected{% endif %}>{{ reg.name }}</option>
+          {% endfor %}
+        </select>
+      </label><br>
+      <label>Nombre corto <input type="text" name="short_name" value="{{ route.short_name if route else '' }}" /></label><br>
+      <label>Nombre largo <input type="text" name="long_name" value="{{ route.long_name if route else '' }}" /></label><br>
+      <button type="submit">Guardar</button>
+    </form>
+    <a href="{{ url_for('list_routes') }}">Volver</a>
+  </body>
+</html>

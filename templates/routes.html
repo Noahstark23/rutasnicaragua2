@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rutas</title>
+  </head>
+  <body>
+    <h1>Rutas</h1>
+    <form method="get">
+      <input type="text" name="region" placeholder="Buscar región" value="{{ search or '' }}" />
+      <button type="submit">Buscar</button>
+    </form>
+    <a href="{{ url_for('new_route') }}">Agregar nueva</a>
+    <table border="1">
+      <tr><th>ID</th><th>Región</th><th>Nombre corto</th><th>Nombre largo</th><th>Acciones</th></tr>
+      {% for r in routes %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.region.name if r.region else '' }}</td>
+        <td>{{ r.short_name }}</td>
+        <td>{{ r.long_name }}</td>
+        <td>
+          <a href="{{ url_for('edit_route', route_id=r.id) }}">Editar</a>
+          <form method="post" action="{{ url_for('delete_route', route_id=r.id) }}" style="display:inline">
+            <button type="submit" onclick="return confirm('¿Eliminar?')">Eliminar</button>
+          </form>
+          <a href="{{ url_for('view_stops', route_id=r.id) }}">Paradas</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="{{ url_for('import_json') }}">Importar JSON</a>
+    <a href="{{ url_for('export_gtfs') }}">Exportar GTFS</a>
+    <a href="{{ url_for('logout') }}">Salir</a>
+  </body>
+</html>

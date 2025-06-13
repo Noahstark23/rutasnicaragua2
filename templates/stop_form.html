@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Parada</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>#map{height:300px;}</style>
+  </head>
+  <body>
+    <h1>Editar parada</h1>
+    <form method="post">
+      <input type="hidden" name="route_id" value="{{ request.args.get('route_id') }}" />
+      <label>Nombre <input type="text" name="name" id="name" value="{{ stop.name }}" /></label><br>
+      <label>Lat <input type="text" name="lat" id="lat" value="{{ stop.lat }}" /></label><br>
+      <label>Lon <input type="text" name="lon" id="lon" value="{{ stop.lon }}" /></label><br>
+      <div id="map"></div>
+      <button type="submit">Guardar</button>
+    </form>
+    <a href="{{ url_for('view_stops', route_id=request.args.get('route_id')) }}">Volver</a>
+    <script>
+      var map = L.map('map').setView([{{ stop.lat }}, {{ stop.lon }}], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      var marker = L.marker([{{ stop.lat }}, {{ stop.lon }}], {draggable:true}).addTo(map);
+      marker.on('dragend', function(e) {
+        var pos = marker.getLatLng();
+        document.getElementById('lat').value = pos.lat.toFixed(6);
+        document.getElementById('lon').value = pos.lng.toFixed(6);
+      });
+    </script>
+  </body>
+</html>
