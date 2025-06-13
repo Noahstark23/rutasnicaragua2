@@ -33,6 +33,14 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
+    with app.app_context():
+        db.create_all()
+        if User.query.count() == 0:
+            admin = User(username='admin')
+            admin.set_password(app.config['ADMIN_PASSWORD'])
+            db.session.add(admin)
+            db.session.commit()
+
     def login_required(view):
         @wraps(view)
         def wrapped(*args, **kwargs):
@@ -48,9 +56,12 @@ def create_app():
     @app.route('/login', methods=['GET', 'POST'])
     def login_page():
         if request.method == 'POST':
+            username = request.form.get('username')
             password = request.form.get('password')
-            if password == app.config['ADMIN_PASSWORD']:
+            user = User.query.filter_by(username=username).first()
+            if user and user.check_password(password):
                 session['logged_in'] = True
+                session['username'] = user.username
                 return redirect(url_for('list_routes'))
             flash('Credenciales incorrectas')
         return render_template('login.html')
