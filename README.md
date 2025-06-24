@@ -31,6 +31,21 @@ python json_loader.py
 
 El endpoint de prueba `/api/ping` responderá con `{"message": "API operativa"}`.
 
+### Endpoints GTFS
+
+Obtén información de rutas y paradas cargadas en la base de datos:
+
+```bash
+# Listar rutas opcionalmente filtrando por región
+curl "http://localhost:5000/api/rutas?region=Managua"
+
+# Paradas de una ruta
+curl "http://localhost:5000/api/paradas?ruta=1"
+
+# Horarios en una parada para una fecha concreta
+curl "http://localhost:5000/api/horarios?ruta=1&parada=S1&fecha=2025-01-01"
+```
+
 ## Migraciones de la base de datos
 
 Para aplicar las migraciones de la base de datos ejecuta:
