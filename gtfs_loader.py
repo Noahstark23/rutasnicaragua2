@@ -1,6 +1,17 @@
 import os
+import csv
 import pandas as pd
-from models import db, Route, Stop, Trip, StopTime
+import datetime as dt
+from models import (
+    db,
+    Route,
+    Stop,
+    Trip,
+    StopTime,
+    Agency,
+    Calendar,
+    CalendarDate,
+)
 
 
 def row_to_route(row):
@@ -40,6 +51,74 @@ def row_to_stop_time(row):
         stop_id=row["stop_id"],
         stop_sequence=row["stop_sequence"],
     )
+
+
+def load_agency(session, path_agency_txt):
+    objs = []
+    if os.path.exists(path_agency_txt):
+        with open(path_agency_txt, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                objs.append(
+                    Agency(
+                        agency_id=row.get("agency_id"),
+                        agency_name=row["agency_name"],
+                        agency_url=row["agency_url"],
+                        agency_timezone=row["agency_timezone"],
+                        agency_lang=row.get("agency_lang"),
+                        agency_phone=row.get("agency_phone"),
+                    )
+                )
+    if objs:
+        session.bulk_save_objects(objs)
+
+
+def load_calendar(session, path_calendar_txt):
+    objs = []
+    if os.path.exists(path_calendar_txt):
+        with open(path_calendar_txt, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                objs.append(
+                    Calendar(
+                        service_id=row["service_id"],
+                        monday=bool(int(row["monday"])),
+                        tuesday=bool(int(row["tuesday"])),
+                        wednesday=bool(int(row["wednesday"])),
+                        thursday=bool(int(row["thursday"])),
+                        friday=bool(int(row["friday"])),
+                        saturday=bool(int(row["saturday"])),
+                        sunday=bool(int(row["sunday"])),
+                        start_date=dt.datetime.strptime(row["start_date"], "%Y%m%d").date(),
+                        end_date=dt.datetime.strptime(row["end_date"], "%Y%m%d").date(),
+                    )
+                )
+    if objs:
+        session.bulk_save_objects(objs)
+
+
+def load_calendar_dates(session, path_calendar_dates_txt):
+    objs = []
+    if os.path.exists(path_calendar_dates_txt):
+        with open(path_calendar_dates_txt, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                objs.append(
+                    CalendarDate(
+                        service_id=row["service_id"],
+                        date=dt.datetime.strptime(row["date"], "%Y%m%d").date(),
+                        exception_type=int(row["exception_type"]),
+                    )
+                )
+    if objs:
+        session.bulk_save_objects(objs)
+
+
+def load_gtfs(session, folder_path):
+    load_agency(session, f"{folder_path}/agency.txt")
+    load_calendar(session, f"{folder_path}/calendar.txt")
+    load_calendar_dates(session, f"{folder_path}/calendar_dates.txt")
+    session.commit()
 
 
 def load_gtfs_data(app, data_dir="data/gtfs"):

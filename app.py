@@ -31,6 +31,7 @@ def create_app():
     )
     app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD', 'changeme')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.permanent_session_lifetime = datetime.timedelta(days=int(os.getenv('SESSION_DAYS', '7')))
     db.init_app(app)
 
     with app.app_context():
@@ -60,6 +61,7 @@ def create_app():
             password = request.form.get('password')
             user = User.query.filter_by(username=username).first()
             if user and user.check_password(password):
+                session.permanent = True
                 session['logged_in'] = True
                 session['username'] = user.username
                 return redirect(url_for('list_routes'))

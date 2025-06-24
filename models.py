@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, String
 
 db = SQLAlchemy()
+Base = db.Model
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -55,3 +57,35 @@ class StopTime(db.Model):
     stop_sequence = db.Column(db.Integer, nullable=False)
     trip = db.relationship('Trip', backref=db.backref('stop_times', lazy=True))
     stop = db.relationship('Stop', backref=db.backref('stop_times', lazy=True))
+
+
+class Agency(Base):
+    __tablename__ = 'agency'
+    agency_id = db.Column(String, primary_key=True)
+    agency_name = db.Column(String, nullable=False)
+    agency_url = db.Column(String, nullable=False)
+    agency_timezone = db.Column(String, nullable=False)
+    agency_lang = db.Column(String, nullable=True)
+    agency_phone = db.Column(String, nullable=True)
+
+
+class Calendar(Base):
+    __tablename__ = 'calendar'
+    service_id = db.Column(String, primary_key=True)
+    monday = db.Column(Boolean, nullable=False)
+    tuesday = db.Column(Boolean, nullable=False)
+    wednesday = db.Column(Boolean, nullable=False)
+    thursday = db.Column(Boolean, nullable=False)
+    friday = db.Column(Boolean, nullable=False)
+    saturday = db.Column(Boolean, nullable=False)
+    sunday = db.Column(Boolean, nullable=False)
+    start_date = db.Column(Date, nullable=False)
+    end_date = db.Column(Date, nullable=False)
+
+
+class CalendarDate(Base):
+    __tablename__ = 'calendar_dates'
+    id = db.Column(Integer, primary_key=True, autoincrement=True)
+    service_id = db.Column(String, ForeignKey('calendar.service_id'), nullable=False)
+    date = db.Column(Date, nullable=False)
+    exception_type = db.Column(Integer, nullable=False)
