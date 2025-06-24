@@ -30,3 +30,13 @@ python json_loader.py
 ```
 
 El endpoint de prueba `/api/ping` responderá con `{"message": "API operativa"}`.
+
+## Migraciones de la base de datos
+
+Para aplicar las migraciones de la base de datos ejecuta:
+
+```bash
+pip install -r requirements.txt
+export DATABASE_URL="<tu-string-DB>"
+alembic upgrade head
+```
