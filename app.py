@@ -13,8 +13,10 @@ from flask import (
     flash,
     send_file,
 )
+from flask_cors import CORS
 from dotenv import load_dotenv
 from models import db, User, Region, Route, Stop, Trip, StopTime
+from api.gtfs_routes import bp as gtfs_routes_bp
 import pandas as pd
 import tempfile
 import zipfile
@@ -24,6 +26,7 @@ import io
 def create_app():
     load_dotenv()
     app = Flask(__name__)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'changeme')
     app.config['SQLALCHEMY_DATABASE_URI'] = (
         f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@"
@@ -33,6 +36,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.permanent_session_lifetime = datetime.timedelta(days=int(os.getenv('SESSION_DAYS', '7')))
     db.init_app(app)
+    app.register_blueprint(gtfs_routes_bp)
 
     with app.app_context():
         db.create_all()
@@ -46,7 +50,7 @@ def create_app():
         @wraps(view)
         def wrapped(*args, **kwargs):
             if not session.get('logged_in'):
-                return redirect(url_for('login_page'))
+                return redirect(url_for('login_page', next=request.path))
             return view(*args, **kwargs)
         return wrapped
 
@@ -56,17 +60,19 @@ def create_app():
 
     @app.route('/login', methods=['GET', 'POST'])
     def login_page():
+        next_url = request.args.get('next')
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
+            next_url = request.form.get('next') or next_url
             user = User.query.filter_by(username=username).first()
             if user and user.check_password(password):
                 session.permanent = True
                 session['logged_in'] = True
                 session['username'] = user.username
-                return redirect(url_for('list_routes'))
+                return redirect(next_url or url_for('list_routes'))
             flash('Credenciales incorrectas')
-        return render_template('login.html')
+        return render_template('login.html', next=next_url)
 
     @app.route('/logout')
     def logout():
